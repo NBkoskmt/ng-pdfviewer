@@ -3,11 +3,11 @@
 	<head>
 		<meta charset="utf-8">
 		<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
-		<script src="pdf.compat.js"></script>
-		<script src="pdf.js"></script>
+		<script src="/example/pdf.compat.js"></script>
+		<script src="/example/pdf.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-		<script src="ng-pdfviewer.js"></script>
-		<script src="test.js"></script>
+		<script src="/ng-pdfviewer.js"></script>
+		<script src="/example/test.js"></script>
 		<title>ng-pdfviewer.js test</title>
 	</head>
 	<body ng-app="testApp">
@@ -22,13 +22,17 @@
 					<button class="btn" ng-click="prevPage()">&lt;</button>
 					<button class="btn" ng-click="nextPage()">&gt;</button>
 					<button class="btn" ng-click="gotoPage(totalPages)">&gt;|</button>
+					<button class="btn" ng-click="changeZoom('page-actual')">page-actual</button>
+					<button class="btn" ng-click="changeZoom('page-width')">page-width</button>
+					<button class="btn" ng-click="changeZoom('page-height')">page-height</button>
+					<button class="btn" ng-click="changeZoom('page-fit')">page-fit</button>
 				</div>
 			</div>
 			<div class="row">
 				<span class="label" ng-show="totalPages">{{currentPage}}/{{totalPages}}</span>
 			</div>
 			<div class="row">
-				<pdfviewer src="{{pdfURL}}" on-page-load='pageLoaded(page,total)' id="viewer" load-progress='loadProgress(loaded, total, state)'></pdfviewer>
+				<pdfviewer src="{{pdfURL}}" on-page-load='pageLoaded(page,total)' id="viewer" load-progress='loadProgress(loaded, total, state)' zoom-level="page-fit"></pdfviewer>
 			</div>
 		</div>
 	</body>
