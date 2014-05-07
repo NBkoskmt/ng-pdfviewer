@@ -68,4 +68,7 @@ MIT. See LICENSE.md for further details.
 
 ## Author
 
+Dominic English
+
+Forked from:
 Andreas Krennmair <ak@synflood.at>
