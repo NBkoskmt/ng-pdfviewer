@@ -8,7 +8,7 @@ AngularJS PDF viewer directive using pdf.js.
 <br>
 <span>{{currentPage}}/{{totalPages}}</span>
 <br>
-<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer"></pdfviewer>
+<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer" zoomLevel="page-fit"></pdfviewer>
 ```
 
 and in your AngularJS code:
@@ -32,8 +32,22 @@ app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf)
 		$scope.currentPage = curPage;
 		$scope.totalPages = totalPages;
 	};
+
+	$scope.changeZoom = function(zoomLevel) {
+		$scope.viewer.changeZoom(zoomLevel);
+	};
 }]);
 ```
+
+## Zoom options
+You can specify some standard zoom options via the `zoomLevel` directive attribute or via the viewer instance method `changeZoom()`.
+
+Acceptable zoom levels are:
+- `page-actual` Equivalent to 100%
+- `page-width` Make the pdf width the same width as the directive
+- `page-height` Make the pdf height the same height as the directive
+- `page-fit` Make the pdf fit inside the directive dimenions
+- Zoom percentage. A value of `200` will display the pdf at 200% of actual size.
 
 ## Requirements
 
@@ -54,4 +68,7 @@ MIT. See LICENSE.md for further details.
 
 ## Author
 
+Dominic English
+
+Forked from:
 Andreas Krennmair <ak@synflood.at>

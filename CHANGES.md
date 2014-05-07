@@ -1,5 +1,10 @@
 # Changes
 
+* 0.3.0:
+    - Add zoom features to directive
+    - Add zoomLevel directive attribute
+    - Add changeZoom method to PDFViewerService
+
 * 0.2.0:
 	- All viewer instances need an ID now; commands are sent to specific instances.
 	- A progress callback can be specified to track download progress.

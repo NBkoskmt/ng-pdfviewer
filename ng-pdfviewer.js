@@ -1,13 +1,13 @@
 /**
  * @preserve AngularJS PDF viewer directive using pdf.js.
  *
- * https://github.com/akrennmair/ng-pdfviewer 
+ * https://github.com/akrennmair/ng-pdfviewer
  *
  * MIT license
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$parse', function($parse) {
+directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 	var canvas = null;
 	var instance_id = null;
 
@@ -18,12 +18,13 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			onPageLoad: '&',
 			loadProgress: '&',
 			src: '@',
-			id: '='
+			id: '=',
+			zoomLevel: '@'
 		},
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
-			$scope.scale = 1.0;
+			$scope.zoomLevel = $scope.zoomLevel || 1.0;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
@@ -32,7 +33,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.loadPDF = function(path) {
-				console.log('loadPDF ', path);
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
@@ -49,23 +49,23 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.renderPage = function(num, callback) {
-				console.log('renderPage ', num);
 				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
+					var scale = calculateScale(page, $scope.zoomLevel);
+					var viewport = page.getViewport(scale);
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
 					canvas.width = viewport.width;
 
-					page.render({ canvasContext: ctx, viewport: viewport }).promise.then(
-						function() { 
+					page.render({ canvasContext: ctx, viewport: viewport }).then(
+						function() {
 							if (callback) {
 								callback(true);
 							}
 							$scope.$apply(function() {
 								$scope.onPageLoad({ page: $scope.pageNum, total: $scope.pdfDoc.numPages });
 							});
-						}, 
+						},
 						function() {
 							if (callback) {
 								callback(false);
@@ -108,18 +108,78 @@ directive('pdfviewer', [ '$parse', function($parse) {
 					$scope.renderPage($scope.pageNum);
 				}
 			});
+
+			$scope.$on('pdfviewer.changeZoom', function(evt, id, zoomLevel) {
+				if (id !== instance_id) {
+					return;
+				}
+
+				$scope.zoomLevel = zoomLevel;
+				$scope.renderPage($scope.pageNum);
+			});
+
+			var calculateScale = function(page, zoomLevel) {
+
+				if (+zoomLevel > 0) {
+					return zoomLevel / 100;
+				}
+
+				var defaultViewport = page.getViewport(1.0);
+				var pageWidthScale = $scope.containerWidth / defaultViewport.width;
+				var pageHeightScale = $scope.containerHeight / defaultViewport.height;
+
+				switch(zoomLevel) {
+					case 'page-actual':
+						scale = 1;
+						break;
+					case 'page-width':
+						scale = pageWidthScale;
+						break;
+					case 'page-height':
+						scale = pageHeightScale;
+						break;
+					case 'page-fit':
+						scale = Math.min(pageWidthScale, pageHeightScale);
+						break;
+					default:
+						console.error('Calculate scale: '+zoomLevel+' is not a valid zoom level');
+				}
+
+				return scale;
+			}
+
 		} ],
 		link: function(scope, iElement, iAttr) {
+			iElement.css('display', 'block');
 			canvas = iElement.find('canvas')[0];
 			instance_id = iAttr.id;
 
 			iAttr.$observe('src', function(v) {
-				console.log('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
 					scope.pageNum = 1;
 					scope.loadPDF(scope.src);
 				}
 			});
+
+			var setContainerSize = function() {
+				var viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+				var containerTopOffset = iElement[0].offsetTop;
+				var verticalPadding = 5;
+				scope.containerWidth = iElement[0].offsetWidth;
+				scope.containerHeight = viewportHeight - containerTopOffset - verticalPadding;
+			}
+			setContainerSize();
+
+			var resizePromise;
+			window.onresize = function(){
+				if (resizePromise) {
+					$timeout.cancel(resizePromise);
+				}
+				resizePromise = $timeout(function() {
+					setContainerSize();
+					scope.renderPage(scope.pageNum);
+				}, 100);
+			};
 		}
 	};
 }]).
@@ -146,6 +206,9 @@ service("PDFViewerService", [ '$rootScope', function($rootScope) {
 			},
 			gotoPage: function(page) {
 				$rootScope.$broadcast('pdfviewer.gotoPage', instance_id, page);
+			},
+			changeZoom: function(zoomLevel) {
+				$rootScope.$broadcast('pdfviewer.changeZoom', instance_id, zoomLevel);
 			}
 		};
 	};

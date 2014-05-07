@@ -27,4 +27,8 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 	$scope.loadProgress = function(loaded, total, state) {
 		console.log('loaded =', loaded, 'total =', total, 'state =', state);
 	};
+
+	$scope.changeZoom = function(zoomLevel) {
+		$scope.instance.changeZoom(zoomLevel);
+	};
 }]);
