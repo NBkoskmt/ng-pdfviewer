@@ -41,7 +41,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 						}
 					});
 				}, function(message, exception) {
-					console.log("PDF load error: " + message);
+					console.error("PDF load error: " + message);
 					if ($scope.loadProgress) {
 						$scope.loadProgress({state: "error", loaded: 0, total: 0});
 					}
@@ -72,14 +72,13 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 							if (callback) {
 								callback(false);
 							}
-							console.log('page.render failed');
+							console.error('page.render failed');
 						}
 					);
 				});
 			};
 
 			$scope.$on('pdfviewer.loadPdf', function(evt, path, page) {
-				console.log('event caught', path, page);
 				if (!path) return;
 				if (!page) page = 1;
 				$scope.pageNum = page;
@@ -211,7 +210,6 @@ service("PDFViewerService", [ '$rootScope', function($rootScope) {
 
 		return {
 			loadPdf: function(path, page) {
-				console.log('load event', path, page);
 				$rootScope.$broadcast('pdfviewer.loadPdf', path, page);
 			},
 			prevPage: function() {
