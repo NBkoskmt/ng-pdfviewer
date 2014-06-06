@@ -6,4 +6,5 @@ app.use(express.static('../'));
 
 app.listen(port, function() {
     console.log('ng-pdfviewer example listening on port '+port);
+    console.log('Open localhost:'+port+'/example/index.html');
 });
