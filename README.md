@@ -49,6 +49,19 @@ Acceptable zoom levels are:
 - `page-fit` Make the pdf fit inside the directive dimenions
 - Zoom percentage. A value of `200` will display the pdf at 200% of actual size.
 
+## PDF loading options
+Instead of using the `src` attribute in the pdfviewer directive, you can manually load a PDF as well as optionally specifying a particular page to initially load. The value `last` is an acceptable page value to select the final page of the newly loaded pdf.
+
+``` js
+app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf) {
+	...
+	$scope.loadPdfFinalPage = function(pathToPdf) {
+		$scope.viewer.loadPdf(pathToPdf, 'last');
+	}
+	...
+}]);
+```
+
 ## Requirements
 
 * AngularJS (http://angularjs.org/)

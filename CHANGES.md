@@ -1,5 +1,9 @@
 # Changes
 
+* 0.4.0:
+    - Add the ability to set pageNum to 'last' to load the final page of a pdf
+    - Add an instance method to manually load a pdf and page instead of using the html src attribute
+
 * 0.3.0:
     - Add zoom features to directive
     - Add zoomLevel directive attribute
