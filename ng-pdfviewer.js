@@ -12,7 +12,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 	var instance_id = null;
 
 	return {
-		restrict: "E",
+		restrict: "EA",
 		template: '<canvas></canvas>',
 		scope: {
 			onPageLoad: '&',
@@ -49,6 +49,8 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 			};
 
 			$scope.renderPage = function(num, callback) {
+				if (num === 'last') num = $scope.pdfDoc.numPages;
+				$scope.pageNum = num;
 				$scope.pdfDoc.getPage(num).then(function(page) {
 					var scale = calculateScale(page, $scope.zoomLevel);
 					var viewport = page.getViewport(scale);
@@ -75,6 +77,14 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 					);
 				});
 			};
+
+			$scope.$on('pdfviewer.loadPdf', function(evt, path, page) {
+				console.log('event caught', path, page);
+				if (!path) return;
+				if (!page) page = 1;
+				$scope.pageNum = page;
+				$scope.loadPDF(path);
+			});
 
 			$scope.$on('pdfviewer.nextPage', function(evt, id) {
 				if (id !== instance_id) {
@@ -120,6 +130,8 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 
 			var calculateScale = function(page, zoomLevel) {
 
+				if (!zoomLevel) zoomLevel = 100;
+
 				if (+zoomLevel > 0) {
 					return zoomLevel / 100;
 				}
@@ -146,7 +158,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 				}
 
 				return scale;
-			}
+			};
 
 		} ],
 		link: function(scope, iElement, iAttr) {
@@ -198,6 +210,10 @@ service("PDFViewerService", [ '$rootScope', function($rootScope) {
 		var instance_id = id;
 
 		return {
+			loadPdf: function(path, page) {
+				console.log('load event', path, page);
+				$rootScope.$broadcast('pdfviewer.loadPdf', path, page);
+			},
 			prevPage: function() {
 				$rootScope.$broadcast('pdfviewer.prevPage', instance_id);
 			},
