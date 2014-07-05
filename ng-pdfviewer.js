@@ -174,11 +174,8 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 			});
 
 			var setContainerSize = function() {
-				var viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-				var containerTopOffset = iElement[0].offsetTop;
-				var verticalPadding = 5;
 				scope.containerWidth = iElement[0].offsetWidth;
-				scope.containerHeight = viewportHeight - containerTopOffset - verticalPadding;
+				scope.containerHeight = iElement[0].clientHeight;
 			}
 			
 			$timeout(setContainerSize).then(function(){
