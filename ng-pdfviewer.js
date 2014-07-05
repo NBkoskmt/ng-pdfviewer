@@ -180,18 +180,19 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 				scope.containerWidth = iElement[0].offsetWidth;
 				scope.containerHeight = viewportHeight - containerTopOffset - verticalPadding;
 			}
-			setContainerSize();
-
-			var resizePromise;
-			window.onresize = function(){
-				if (resizePromise) {
-					$timeout.cancel(resizePromise);
-				}
-				resizePromise = $timeout(function() {
-					setContainerSize();
-					scope.renderPage(scope.pageNum);
-				}, 100);
-			};
+			
+			$timeout(setContainerSize).then(function(){
+				var resizePromise;
+				window.onresize = function(){
+					if (resizePromise) {
+						$timeout.cancel(resizePromise);
+					}
+					resizePromise = $timeout(function() {
+						setContainerSize();
+						scope.renderPage(scope.pageNum);
+					}, 100);
+				};
+			});
 		}
 	};
 }]).
